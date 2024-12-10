@@ -1,0 +1,27 @@
+data = "When in the course of human events, it becomes necessary for one people to ..."
+
+'W' = 0x57 = 0b01010111 => 0b01 0b01 0b01 0b11
+[
+	00 => <key0>
+	01 => <key1>
+	10 => <key2>
+	11 => <key3>
+]
+
+encrypt (data) using key1, transmit to client
+client receives encrypted packet
+client randomly selects a key from the list of un-tried keys for crumb index 0
+client attempts to decrypt crumb using selected key
+one of two things happens:
+-client successfully decrypts msg and identifies the pre-shared confirmation
+--client marks crumb index 0 as decrypted, skips index 0 in all subsequent transmissions
+-client fails to decrypt msg
+--client marks randomly-selected key as invalid for crumb index 0
+Note: This is intended as a model of a physical system.  In the real version of this algorithm the sender is using pulses of light polairzed with one of four filters selected based on the value of the current crumb, and the receiver only has time and opportunity to select one of the polarizing filters it has not yet attempted for the pulse index being received.  After each round of pulses, the sender should have sent one coded pulse for each crumb within the file data, and the receiver should have been capable of decrypting around one quarter of the total file data.  The receiver in the real system only gets to randomly select a polarizer for each pulse of light out of the set of filters it has not yet tried for pulse index I.  This means you will need to maintain both a list of crumbs which have been successfully decoded, and a list of lists of keys that have been attempted for each index.
+
+client transmits ACK to server to continue sending
+server continues to send crumbs to client in order using keys selected based on crumb values
+client attempts to decrypt each one, either marking the crumb as found if decryption is successful or marking the key as invalid for current crumb if unsuccessful
+after server has completed sending the entire file, the client should now have approximately 25% of the data
+server begins sending the file again, from the top
+client now either skips decrypt for crumbs it already has, or attempts a new randomly-selected key from the list of un-checked keys for crumb index
